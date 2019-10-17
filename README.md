@@ -14,3 +14,8 @@ Designed as top down hide and seek game.
  - tagging
 
 ## References
+ - [2D Navmesh](https://github.com/7ark/Unity-Pathfinding)
+ - [2D Nodal pathfinding](http://www.jgallant.com/nodal-pathfinding-in-unity-2d-with-a-in-non-grid-based-games/)
+ - [Navmesh2D](https://noobtuts.com/unity/navigation2d)
+ - [Unity Navmesh to Navmesh2D](https://github.com/h8man/NavMeshPlus)
+ - [2D Raycast based pathfinding](https://answers.unity.com/questions/47618/ray-based-pathfinding.html)
