@@ -38,5 +38,11 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.h8man.2d.navmeshplus": {
+      "hash": "3e4a07a5d5ce1eb492b206bda103fb50a021a780",
+      "revision": "master"
+    }
   }
 }

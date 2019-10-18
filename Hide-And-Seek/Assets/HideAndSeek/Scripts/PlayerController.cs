@@ -17,12 +17,18 @@ public class PlayerController : MonoBehaviour
     SpriteRenderer sprite;
     Animator animator;
 
+    ItState hideAndSeekRole = ItState.None;
+    ChaseState hideAndSeekState = ChaseState.None;
+
+    float spotHideDist = 3f;
 
     // Define with unity player input button to use for object interaction
     public string fishButton = "Jump";
 
     // Define the layer your interactable colliders are on
     public LayerMask interactMask;
+
+    public LayerMask characterMask;
 
     // Tracking the direction your character is looking -> for animating your character
     Vector2 lookDirection = new Vector2(1, 0);
@@ -50,6 +56,16 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if(hideAndSeekRole == ItState.Chaser)
+        {
+            var hit = Physics2D.Raycast(rigidbody2d.position, lookDirection, spotHideDist, characterMask);
+            var chaser = hit.collider.GetComponent<ChaserController>();
+            if (chaser != null)
+            {
+                chaser.Spotted();
+            }
+        }
+
         // Get your up/down/left/right player input
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
@@ -67,7 +83,7 @@ public class PlayerController : MonoBehaviour
         // Set your animator animation direction and speeds
         animator.SetFloat("Look X", lookDirection.x);
         animator.SetFloat("Look Y", lookDirection.y);
-        animator.SetFloat("Speed", move.magnitude);
+        //animator.SetFloat("Speed", move.magnitude);
 
         // Get your current position
         Vector2 position = rigidbody2d.position;
