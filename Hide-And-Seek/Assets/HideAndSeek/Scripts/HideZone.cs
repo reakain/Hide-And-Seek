@@ -11,7 +11,7 @@ public class HideZone : MonoBehaviour
         position = transform.position;
     }
 
-    public float Distance(Vector2 target) 
+    public float Distance(Vector2 target)
     {
         return Vector2.Distance(position, target);
     }
@@ -23,11 +23,13 @@ public class HideZone : MonoBehaviour
 
         if (controller != null)
         {
-            //seesPlayer = true;
+            controller.Hide();
         }
-        else if(NPCControl != null)
+        else if (NPCControl != null)
         {
-            NPCControl.StartHiding();
+            NPCControl.Hide();
+            NPCControl.inHideZone = true;
+
         }
     }
 
@@ -35,10 +37,16 @@ public class HideZone : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
     {
         PlayerController controller = other.GetComponent<PlayerController>();
+        ChaserController NPCControl = other.GetComponent<ChaserController>();
 
         if (controller != null)
         {
-            //seesPlayer = false;
+            //controller.Hide();
+        }
+        else if (NPCControl != null)
+        {
+            NPCControl.inHideZone = false;
+
         }
     }
 }

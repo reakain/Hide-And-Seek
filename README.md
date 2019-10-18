@@ -9,8 +9,6 @@ Designed as top down hide and seek game.
 
 ## To-Do
  - State change logic
- - obstacle handling
- - hiding
  - tagging
 
 ## References

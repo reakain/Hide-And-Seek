@@ -17,10 +17,10 @@ public class PlayerController : MonoBehaviour
     SpriteRenderer sprite;
     Animator animator;
 
-    ItState hideAndSeekRole = ItState.None;
-    ChaseState hideAndSeekState = ChaseState.None;
+    public ItState hideAndSeekRole = ItState.None;
+    public ChaseState hideAndSeekState = ChaseState.None;
 
-    float spotHideDist = 3f;
+    float spotHideDist;
 
     // Define with unity player input button to use for object interaction
     public string fishButton = "Jump";
@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     // Define the layer your interactable colliders are on
     public LayerMask interactMask;
 
-    public LayerMask characterMask;
+    LayerMask characterMask;
 
     // Tracking the direction your character is looking -> for animating your character
     Vector2 lookDirection = new Vector2(1, 0);
@@ -43,7 +43,8 @@ public class PlayerController : MonoBehaviour
         collider = GetComponent<Collider2D>();
         sprite = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-
+        spotHideDist = HideAndSeekController.instance.spotHideDist;
+        characterMask = HideAndSeekController.instance.characterMask;
         instance = this;
     }
 
@@ -59,10 +60,13 @@ public class PlayerController : MonoBehaviour
         if(hideAndSeekRole == ItState.Chaser)
         {
             var hit = Physics2D.Raycast(rigidbody2d.position, lookDirection, spotHideDist, characterMask);
-            var chaser = hit.collider.GetComponent<ChaserController>();
-            if (chaser != null)
+            if (hit.collider != null)
             {
-                chaser.Spotted();
+                var chaser = hit.collider.GetComponent<ChaserController>();
+                if (chaser != null)
+                {
+                    chaser.Spotted();
+                }
             }
         }
 
@@ -96,4 +100,14 @@ public class PlayerController : MonoBehaviour
 
         
     }
+
+    public void Hide()
+    {
+        if(hideAndSeekRole == ItState.Hider)
+        {
+            hideAndSeekState = ChaseState.Hidden;
+        }
+    }
+
+
 }
