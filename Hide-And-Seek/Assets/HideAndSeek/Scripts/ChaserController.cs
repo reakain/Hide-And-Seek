@@ -14,7 +14,6 @@ public class ChaserController : Unit2D
     public ChaseState currentState = ChaseState.None;
     public ItState itState = ItState.None;
 
-    Vector2 lastPosition;
 
     public bool seesPlayer = false;
 
@@ -23,11 +22,10 @@ public class ChaserController : Unit2D
     public LayerMask obstacleLayer;
 
 
-    Rigidbody2D rigidbody2d;
     Animator animator;
     CapsuleCollider2D collider;
 
-    public HideZone[] hideZones;
+    HideZone[] hideZones;
 
     Queue<HideZone> searchedList;
 
@@ -40,29 +38,26 @@ public class ChaserController : Unit2D
     private void Awake()
     {
         searchedList = new Queue<HideZone>();
-
-        rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
         collider = GetComponent<CapsuleCollider2D>();
-        lastPosition = new Vector2(rigidbody2d.position.x, rigidbody2d.position.y);
         hideZones = FindObjectsOfType<HideZone>();
     }
 
     protected override void Start()
     {
-        
+        base.Start();
         itState = ItState.Chaser;
-        currentState = ChaseState.Search;
+        currentState = ChaseState.Chase;
         SetNearestHide(true);
         spotHideDist = HideAndSeekController.instance.spotHideDist;
         characterMask = HideAndSeekController.instance.characterMask;
         hideLayer = HideAndSeekController.instance.hideLayer;
-        base.Start();
+        
     }
 
     void FixedUpdate()
     {
-        SetLook();
+        //SetLook();
         switch (currentState)
         {
             case ChaseState.None:
@@ -74,12 +69,8 @@ public class ChaserController : Unit2D
                 Search();
                 break;
             case ChaseState.Flee:
-                ChaseFlee();
                 break;
             case ChaseState.Chase:
-                //ChaseFlee();
-                //pather.canMove = true;
-                
                 break;
             case ChaseState.Caught:
                 break;
@@ -113,7 +104,6 @@ public class ChaserController : Unit2D
         itState = ItState.Hider;
         SetNearestHide();
         currentState = ChaseState.Hide;
-        //pather.canMove = true;
     }
 
     public void Hide()
@@ -121,11 +111,9 @@ public class ChaserController : Unit2D
         if (currentState == ChaseState.Hide)
         {
             currentState = ChaseState.Hidden;
-            //pather.canMove = false;
         }
         else if (currentState == ChaseState.Search)
         {
-            Debug.Log("Go to new point!");
             SetNearestHide(true);
         }
     }
@@ -148,7 +136,7 @@ public class ChaserController : Unit2D
     
     public void Search()
     {
-        var hit = Physics2D.CircleCast(rigidbody2d.position,spotHideDist, lookDirection, spotHideDist, characterMask);
+        var hit = Physics2D.CircleCast(rigid2d.position,spotHideDist, lookDirection, spotHideDist, characterMask);
         if (hit.collider != null)
         {
             var player = hit.collider.GetComponent<PlayerController>();
@@ -171,15 +159,15 @@ public class ChaserController : Unit2D
     {
         target = newTarget;
         targetBounds = bounds;
-        StopCoroutine("UpdatePath");
         StopCoroutine("FollowPath");
-        StartCoroutine("UpdatePath");
     }
+
     void ChangeMoveTarget(Transform newTarget)
     {
         ChangeMoveTarget(newTarget, Vector2.zero);
     }
 
+    // Find the nearest hiding spot, and set that as the next destination. if the npc is searching, then add it to the queue so they wont just keep staying there
     public void SetNearestHide(bool isSearching = false)
     {
         if (isSearching)
@@ -191,93 +179,34 @@ public class ChaserController : Unit2D
                 searchedList.Enqueue(target.gameObject.GetComponent<HideZone>());
                 tempHide = hideZones.Where(o => !searchedList.Contains(o));
             }
-            var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
-            var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
+            var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigid2d.position));
+            var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigid2d.position) == minDist);
             ChangeMoveTarget( closeHide.transform, closeHide.bounds );
             searchedList.Enqueue(closeHide);
         }
         else
         {
-            var minDist = hideZones.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
-            var closeHide = hideZones.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
+            var minDist = hideZones.Min<HideZone>(o => Vector2.Distance(o.position, rigid2d.position));
+            var closeHide = hideZones.First(o => Vector2.Distance(o.position, rigid2d.position) == minDist);
             ChangeMoveTarget(closeHide.transform, closeHide.bounds);
         }
     }
 
-    public void ChaseFlee()
+
+    protected override void UpdateAnimationDirection(Vector2 movement)
     {
-        Vector2 move;
-        var speed = movementSpeed * Time.deltaTime;
-
-        if (!seesPlayer)
-        {
-            //Check if there is a collider in a certain distance of the object if not then do the following
-            if (!Physics2D.Raycast(collider.bounds.center, lookDirection, maxDistance, obstacleLayer))
-            {
-                // Move forward
-                move = Vector2.MoveTowards(rigidbody2d.position, lookDirection* maxDistance, speed);
-                //transform.Translate(Vector3.forward * speed * Time.smoothDeltaTime);
-            }
-            else
-            {
-                int dIrection = -1;
-                // If there is a object at the right side of the object then give a random direction
-                if (Physics.Raycast(rigidbody2d.position, lookDirection.Rotate(-90), maxDistance))
-                {
-                    dIrection = Random.Range(-1, 2);
-                }
-                // If there is a object at the left side of the object then give a random direction
-                if (Physics.Raycast(collider.bounds.center, lookDirection.Rotate(90), maxDistance))
-                {
-                    dIrection = Random.Range(-1, 2);
-                }
-                //rotate 90 degrees in the random direction
-               move = Vector2Extension.Rotate(new Vector2(rigidbody2d.position.x, rigidbody2d.position.y), 90 * speed * dIrection);
-            }
-        }
-        // If current distance is smaller than the given ditance, then rotate towards player, and translate the rotation into forward motion times the given speed
-        else 
-        {
-            speed = ((currentState == ChaseState.Chase) ? 1 : -1) * speed; // Move towards or away?
-            move = Vector2.MoveTowards(rigidbody2d.position, PlayerController.instance.transform.position, speed);
-        }
-
-        
-        SetLook(move);
-
-        // Get your current position
-        //Vector2 position = rigidbody2d.position;
-
-        // Set your position as your position plus your movement vector, times your speed multiplier, and the current game timestep;
-        //position = position + move * speed * Time.deltaTime;
-
-        // Tell the rigidbody to move to the positon specified
-        rigidbody2d.MovePosition(move);
-
-    }
-
-    void SetLook(Vector2 move)
-    {
+        base.UpdateAnimationDirection(movement);
         // If your moving, set your look direction as move direction and normalize the vector (set it to magnitude of 1)
-        if (!(move.x == 0f) || !(move.y == 0f))
+        if (!(movement.x == 0f) || !(movement.y == 0f))
         {
-            lookDirection.Set(move.x, move.y);
+            lookDirection.Set(-movement.x, -movement.y);
             lookDirection.Normalize();
         }
 
         // Set your animator animation direction and speeds
         animator.SetFloat("Look X", lookDirection.x);
         animator.SetFloat("Look Y", lookDirection.y);
-        //animator.SetFloat("Speed", move.magnitude);
-    }
-
-    void SetLook()
-    {
-        var move = Vector2.MoveTowards(lastPosition, rigidbody2d.position, 1f);
-
-        SetLook(move);
-
-        lastPosition = new Vector2(rigidbody2d.position.x, rigidbody2d.position.y);
+        //animator.SetFloat("MoveSpeed", movement.magnitude);
     }
 
 
@@ -288,6 +217,7 @@ public class ChaserController : Unit2D
         if (player != null)
         {
             // Someone has been caught. Either this npc or the player
+            Debug.Log("Gotcha!");
         }
     }
 

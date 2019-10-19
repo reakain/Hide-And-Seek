@@ -29,7 +29,6 @@ namespace Pathfinding
 
             Node2D startNode = grid.NodeFromWorldPoint(request.pathStart);
             var endNodes = grid.NodesFromWorldBound(request.pathEnd,request.endBounds);
-            UnityEngine.Debug.Log("number of possible end nodes: " + endNodes.Length);
             Node2D[] targetNode = endNodes.Where(n => n.walkable).ToArray();
             
             Node2D endNode = targetNode[0];

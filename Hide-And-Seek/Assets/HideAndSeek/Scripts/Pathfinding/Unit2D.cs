@@ -17,8 +17,6 @@ namespace Pathfinding
         public float stoppingDst = 10;
 
         protected Path2D path;
-
-        protected Animator anim;
         protected Rigidbody2D rigid2d;
 
 
@@ -26,7 +24,6 @@ namespace Pathfinding
         protected virtual void Start()
         {
             rigid2d = GetComponent<Rigidbody2D>();
-            anim = GetComponentInChildren<Animator>();
             StartCoroutine(UpdatePath());
         }
 
@@ -48,7 +45,14 @@ namespace Pathfinding
             {
                 yield return new WaitForSeconds(1f);
             }
-            PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.position,  targetBounds, OnPathFound));
+            if (rigid2d)
+            {
+                PathRequestManager2D.RequestPath(new PathRequest(rigid2d.position, target.position, targetBounds, OnPathFound));
+            }
+            else
+            {
+                PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.position, targetBounds, OnPathFound));
+            }
 
             float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
             Vector3 targetPosOld = target.position;
@@ -59,7 +63,14 @@ namespace Pathfinding
                 //print (((target.position - targetPosOld).sqrMagnitude) + "    " + sqrMoveThreshold);
                 if ((target.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
                 {
-                    PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.position, targetBounds , OnPathFound));
+                    if (rigid2d)
+                    {
+                        PathRequestManager2D.RequestPath(new PathRequest(rigid2d.position, target.position, targetBounds, OnPathFound));
+                    }
+                    else
+                    {
+                        PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.position, targetBounds, OnPathFound));
+                    }
                     targetPosOld = target.position;
                 }
             }
@@ -76,7 +87,17 @@ namespace Pathfinding
 
             while (followingPath)
             {
-                Vector2 pos2D = new Vector2(transform.position.x, transform.position.y);
+                Vector2 pos2D;
+
+                if (rigid2d)
+                {
+                    pos2D = new Vector2(rigid2d.position.x, rigid2d.position.y);
+                }
+                else
+                {
+                    pos2D = new Vector2(transform.position.x, transform.position.y);
+                }
+                
                 while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
                 {
                     if (pathIndex == path.finishLineIndex)
@@ -105,12 +126,28 @@ namespace Pathfinding
                     //Quaternion targetRotation = Quaternion.LookRotation (Vector3.zero,path.lookPoints [pathIndex] - transform.position);
                     //transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                     //transform.Translate (Vector3.up * Time.deltaTime * speed * speedPercent, Space.Self);
-                    transform.position = Vector2.MoveTowards(transform.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
+                    Vector2 move;
+                    if (rigid2d)
+                    {
+                        move = Vector2.MoveTowards(rigid2d.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
+                        rigid2d.MovePosition(move);
+                    }
+                    else
+                    {
+                        move = Vector2.MoveTowards(transform.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
+                        transform.position = move;
+                    }
+                    UpdateAnimationDirection(move);
                 }
 
                 yield return null;
 
             }
+        }
+
+        protected virtual void UpdateAnimationDirection(Vector2 movement)
+        {
+
         }
 
         public void OnDrawGizmos()
