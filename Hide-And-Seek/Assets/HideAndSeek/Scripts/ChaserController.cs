@@ -53,7 +53,7 @@ public class ChaserController : MonoBehaviour
         hideZones = FindObjectsOfType<HideZone>();
 
         currentState = ChaseState.Search;
-        SetNearestHide();
+        SetNearestHide(true);
         spotHideDist = HideAndSeekController.instance.spotHideDist;
         characterMask = HideAndSeekController.instance.characterMask;
         hideLayer = HideAndSeekController.instance.hideLayer;
@@ -61,7 +61,8 @@ public class ChaserController : MonoBehaviour
 
     void FixedUpdate()
     {
-        switch(currentState)
+        SetLook();
+        switch (currentState)
         {
             case ChaseState.None:
                 break;
@@ -77,7 +78,7 @@ public class ChaserController : MonoBehaviour
             case ChaseState.Chase:
                 //ChaseFlee();
                 pather.canMove = true;
-                SetLook();
+                
                 break;
             case ChaseState.Caught:
                 break;
@@ -123,6 +124,7 @@ public class ChaserController : MonoBehaviour
         }
         else if (currentState == ChaseState.Search)
         {
+            Debug.Log("Go to new point!");
             SetNearestHide(true);
         }
     }
@@ -240,7 +242,7 @@ public class ChaserController : MonoBehaviour
     void SetLook(Vector2 move)
     {
         // If your moving, set your look direction as move direction and normalize the vector (set it to magnitude of 1)
-        if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f))
+        if (!(move.x == 0f) || !(move.y == 0f))
         {
             lookDirection.Set(move.x, move.y);
             lookDirection.Normalize();

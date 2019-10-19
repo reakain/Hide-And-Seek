@@ -580,6 +580,10 @@ MonoBehaviour:
   hideLayer:
     serializedVersion: 2
     m_Bits: 1024
+  npcState: 
+  npcRole: 
+  playerState: 0
+  playerRole: 0
 --- !u!4 &463203823
 Transform:
   m_ObjectHideFlags: 0
@@ -637,7 +641,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1157,7 +1161,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1317,7 +1321,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1436,7 +1440,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1661,7 +1665,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1780,7 +1784,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -1873,6 +1877,7 @@ GameObject:
   - component: {fileID: 1590849747}
   - component: {fileID: 1590849748}
   - component: {fileID: 1590849745}
+  - component: {fileID: 1590849746}
   m_Layer: 11
   m_Name: Chaser
   m_TagString: Untagged
@@ -1880,8 +1885,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!61 &1590849739
-BoxCollider2D:
+--- !u!70 &1590849739
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1894,18 +1899,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.4}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.6122449, y: 1}
-    newSize: {x: 0.3, y: 0.49}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
   m_Size: {x: 0.4, y: 0.2}
-  m_EdgeRadius: 0
+  m_Direction: 1
 --- !u!50 &1590849740
 Rigidbody2D:
   serializedVersion: 4
@@ -2007,6 +2002,7 @@ MonoBehaviour:
   currentState: 5
   itState: 1
   seesPlayer: 0
+  inHideZone: 0
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -2042,8 +2038,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 2
-  radius: 0.2
-  height: 0.01
+  radius: 0.5
+  height: 1
   repathRate: 0.5
   canSearch: 1
   canMove: 1
@@ -2059,12 +2055,34 @@ MonoBehaviour:
   maxAcceleration: -2.5
   rotationSpeed: 360
   slowdownDistance: 0.6
-  pickNextWaypointDist: 2
+  pickNextWaypointDist: 0.05
   endReachedDistance: 0.2
-  alwaysDrawGizmos: 0
+  alwaysDrawGizmos: 1
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
+--- !u!114 &1590849746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1590849738}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb6a34d769a1e4ac7b0b30e433aa443c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  smoothType: 0
+  subdivisions: 2
+  iterations: 2
+  strength: 0.271
+  uniformLength: 1
+  maxSegmentLength: 0.5
+  bezierTangentLength: 0.4
+  offset: 0.2
+  factor: 0.1
 --- !u!114 &1590849747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2079,7 +2097,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1
   drawGizmos: 1
-  detailedGizmos: 0
+  detailedGizmos: 1
   startEndModifier:
     addPoints: 0
     exactStartPoint: 3
@@ -2498,7 +2516,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1822436338}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Hide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2569,7 +2587,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.5, y: -0.5}
@@ -2676,7 +2694,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1
   data:
-    dataString: UEsDBBQAAAgIAACYn+u2+e4EWAIAAPcEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQF1VE2T2jAM/SuMz6WTLB8pvbUsy/bAwizb2UsuxlaIB8fO2M7yscN/r+wkJKXTE0J6kt6T5HwSoWwJzGmzNIKvNAfyfUC8Tb4MuuAznOheq624QIt5F9zlHkQD5pU6odEf+zSrC3BGsB9qLz04QmelRKZNseB7mGvrLLozKi1gyGjnsxW6PgfkhD/DmU85o/WQeOuC1iwaXNFkoByYDpo0wGHS4GpYpZikRQncc+7Q8aiBx6MAU6imQURfo4mvr6UUtmFD3LkMardlDga8XC4oigsMfK0cxD53nmg/d51lFlyj3NDzozA4o7oo+anrwRXUHmpmH1RWvs3DZBpY1UVX/8SHcQhnRhfPbd848j1cLtjhlZ4Zta432b77sSMehwEdqTzQnYT3HNSLXhpdKY5BZyqfWll4eOz+3qTNc2CHzl9TbZ1t36rsRt5ust2jF3EN8k9zKYpdGP24dmylDvMO6weDy/mFjMNx2KYEej2N3xbe6L5/RU3gSRjrMNTIVJ7fTlfGQ8kiDM3LqdxcGwWmX6EERaU7b7COu1/iXez/WU/UP5imexNr38FdSnB3+Ci6C2308bYum+vjCmy+rpwUCroF+MALDmqulapvrC+pTdtWJqOsl7avBP/7uMhsNOVJkszYmMVjfHfD3Xi6YxM2ZZRNRsm3KQnXJxTqpHJTE23Gg2tTXXGFl9Z+RwZLQ8tw79zQ41JcCm07pFCZ3jIDoNZ1hRtxMNgEXyZfcIED2oJzQoWFk8+USM0OwNNboTQoXZycoWlXJSWl+NDOe1IyDx+OlFzJ9Q9QSwMEFAAACAgAAJif6xwS9HBsAAAAdwAAAAkAJABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQGrVipLLSrOzM9TslIw0TPSs9BRUEovSizIKAYKGII4pZkpIHa0kqWxWYq5ubllskmyoYmRuYFukolZUrJpsllyYrKpsbmFmVIsUH1JZUGqX2JuKkRPQGJJRlpmXkpmXrqee1FmijvIaKXYWgBQSwECLQAUAAAICAAAmJ/rtvnuBFgCAAD3BAAACwAkAAAAAAAAAAAAAAAAAAAAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwECLQAUAAAICAAAmJ/rHBL0cGwAAAB3AAAACQAkAAAAAAAAAAAAAAClAgAAbWV0YS5qc29uCgAgAAAAAAABABgAAIA+1d6xnQEAgD7V3rGdAQCAPtXesZ0BUEsFBgAAAAACAAIAuAAAAFwDAAAAAA==
+    dataString: UEsDBBQAAAgIAACYn+tq9wEQWgIAAPYEAAALACQAZ3JhcGgwLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFlVE1z2jAQ/SuMzqVj8+XSW0sI6SEfE9rJxRchrbEGWfJIcoBk+O9dyTJ26Qmx+3b3vbeSP4lQtgbmtNkYwR81B/J9RPyZfBn1yQc40b1WW/EBHeZNcFd6EA2YV+qExnjqy6yuwBnBfqi99OAEg40ShTbVmu9hpa2zGC6otIApo52vVhj6HJET/oyXvuSMp0nmTx94WiajCx4ZKAemh2YROM4iroU1ikla1cA95x6dTiM8nQaYQjURkXxN5r6/llLYyIa4cx3UbusSDHi5XFAUFxgs8G8JYl86T3RY+1wUFlxUbuj5Thj0qG1KfurWuIraQ8vsncrGj5nMF4FV2/Txv/w4DenC6Oqhm5smfoYrBTu80jOj1g2cHYbveuJpMOhI5YHuJLyVoJ70xuhGcUw60/jSxsLkrv97lbYqgR36eEu1C3Zzm7q3vNtkt0cv4hLkn1ZSVLtg/awNbKUOfof1g8Hl/ELG4XLY2AKjnsYfC7/pfniLYuJeGOswFWUqz2+nG+OhZB1M83Iat9JGQQhHKTUoKt35Bdu42x3e5AZjbzL31L+XODzmumdwUxLCPT5JblIv+njdli318RFs+dw4KRT0pH3iCX1aaaXaKzb0pCvbNqagbFC2bwT/926R5XTBsyxbshlLZ/jsxrvZYsfmbMEom0+zbwsSLp9QqJPKl5ZotAe3pvrmCi9a9xkZbQytw3Xnhh434qPSA8uFKvSWGQD13Ha4EgeDQ/Bh8jUXaNAWnBMq7Jt85kRqdgCeXxvlQen65AzN+y45qcW7dj6Sk1X4buTkQi5/AVBLAwQUAAAICAAAmJ/rHBL0cGwAAAB3AAAACQAkAG1ldGEuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAatWKkstKs7Mz1OyUjDRM9Kz0FFQSi9KLMgoBgoYgjilmSkgdrSSpbFZirm5uWWySbKhiZG5gW6SiVlSsmmyWXJisqmxuYWZUixQfUllQapfYm4qRE9AYklGWmZeSmZeup57UWaKO8hopdhaAFBLAQItABQAAAgIAACYn+tq9wEQWgIAAPYEAAALACQAAAAAAAAAAAAAAAAAAABncmFwaDAuanNvbgoAIAAAAAAAAQAYAACAPtXesZ0BAIA+1d6xnQEAgD7V3rGdAVBLAQItABQAAAgIAACYn+scEvRwbAAAAHcAAAAJACQAAAAAAAAAAAAAAKcCAABtZXRhLmpzb24KACAAAAAAAAEAGAAAgD7V3rGdAQCAPtXesZ0BAIA+1d6xnQFQSwUGAAAAAAIAAgC4AAAAXgMAAAAA
     upgradeData: 
     file_cachedStartup: {fileID: 0}
     data_cachedStartup: 
@@ -2690,7 +2708,7 @@ MonoBehaviour:
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
   logPathResults: 1
-  maxNearestNodeDistance: 100
+  maxNearestNodeDistance: 5
   scanOnStartup: 1
   fullGetNearestSearch: 0
   prioritizeGraphs: 0
@@ -2737,8 +2755,8 @@ MonoBehaviour:
   - 29
   - 30
   - 31
-  heuristic: 2
-  heuristicScale: 1
+  heuristic: 0
+  heuristicScale: 10
   threadCount: 1
   maxFrameTime: 10
   batchGraphUpdates: 0

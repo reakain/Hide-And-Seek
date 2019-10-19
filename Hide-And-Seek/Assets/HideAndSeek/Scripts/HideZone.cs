@@ -27,6 +27,7 @@ public class HideZone : MonoBehaviour
         }
         else if (NPCControl != null)
         {
+            Debug.Log("In hide zone!");
             NPCControl.Hide();
             NPCControl.inHideZone = true;
 
