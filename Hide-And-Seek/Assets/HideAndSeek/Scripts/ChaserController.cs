@@ -177,9 +177,10 @@ public class ChaserController : MonoBehaviour
         if (isSearching)
         {
             var tempHide = hideZones.Where(o => !searchedList.Contains(o));
-            if (tempHide == null)
+            if (tempHide.Count() <= 0)
             {
                 searchedList.Clear();
+                searchedList.Enqueue(targetSet.target.GetComponent<HideZone>());
                 tempHide = hideZones.Where(o => !searchedList.Contains(o));
             }
             var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
