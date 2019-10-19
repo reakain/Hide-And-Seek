@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
 
+    public Vector2 bounds { get; private set; }
 
     // Character movement speed, adjust to match your game scale
     public float speed = 3.0f;
@@ -41,8 +42,9 @@ public class PlayerController : MonoBehaviour
         // Get the components attached to your character. Animator commented out for still sprite testing
         rigidbody2d = GetComponent<Rigidbody2D>();
         collider = GetComponent<Collider2D>();
+        bounds = collider.bounds.size;
         sprite = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
         spotHideDist = HideAndSeekController.instance.spotHideDist;
         characterMask = HideAndSeekController.instance.characterMask;
         instance = this;

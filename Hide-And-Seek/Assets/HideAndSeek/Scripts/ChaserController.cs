@@ -37,6 +37,7 @@ public class ChaserController : Unit2D
 
     private void Awake()
     {
+        base.Awake();
         searchedList = new Queue<HideZone>();
         animator = GetComponentInChildren<Animator>();
         collider = GetComponent<CapsuleCollider2D>();
@@ -45,14 +46,14 @@ public class ChaserController : Unit2D
 
     protected override void Start()
     {
-        base.Start();
+        
         itState = ItState.Chaser;
-        currentState = ChaseState.Chase;
+        currentState = ChaseState.Search;
         SetNearestHide(true);
         spotHideDist = HideAndSeekController.instance.spotHideDist;
         characterMask = HideAndSeekController.instance.characterMask;
         hideLayer = HideAndSeekController.instance.hideLayer;
-        
+        base.Start();
     }
 
     void FixedUpdate()
@@ -152,14 +153,16 @@ public class ChaserController : Unit2D
         // Play the spotted animation
         currentState = ChaseState.Chase;
         searchedList.Clear();
-        ChangeMoveTarget(hider.transform);
+        ChangeMoveTarget(hider.transform, hider.GetComponent<PlayerController>().bounds); ;
     }
 
     void ChangeMoveTarget(Transform newTarget, Vector2 bounds)
     {
         target = newTarget;
         targetBounds = bounds;
+        //StopCoroutine("UpdatePath");
         StopCoroutine("FollowPath");
+        //StartCoroutine("UpdatePath");
     }
 
     void ChangeMoveTarget(Transform newTarget)

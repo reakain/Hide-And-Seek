@@ -182,7 +182,7 @@ namespace Pathfinding
             int nodesX = Mathf.RoundToInt(worldBounds.x / nodeDiameter);
             nodesX = (nodesX < 1) ? 1 : nodesX;
             int nodesY = Mathf.RoundToInt(worldBounds.y / nodeDiameter);
-            nodesX = (nodesY < 1) ? 1 : nodesY;
+            nodesY = (nodesY < 1) ? 1 : nodesY;
             Vector3 lowerLeftPos = new Vector3(worldPosition.x - worldBounds.x / 2f, worldPosition.y - worldBounds.y / 2f);
             Node2D[] nodes = new Node2D[nodesX * nodesY];
             int i = 0;

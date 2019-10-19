@@ -19,11 +19,14 @@ namespace Pathfinding
         protected Path2D path;
         protected Rigidbody2D rigid2d;
 
-
+        protected virtual void Awake()
+        {
+            rigid2d = GetComponent<Rigidbody2D>();
+        }
 
         protected virtual void Start()
         {
-            rigid2d = GetComponent<Rigidbody2D>();
+            
             StartCoroutine(UpdatePath());
         }
 
@@ -41,9 +44,9 @@ namespace Pathfinding
         protected IEnumerator UpdatePath()
         {
 
-            if (Time.timeSinceLevelLoad < 1f)
+            if (Time.timeSinceLevelLoad < 0.5f)
             {
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(0.5f);
             }
             if (rigid2d)
             {
