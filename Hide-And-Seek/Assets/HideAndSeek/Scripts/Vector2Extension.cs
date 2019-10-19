@@ -34,4 +34,9 @@ public static class Vector2Extension
     {
         return RotateRad(vector, degrees * Mathf.Deg2Rad, pivot);
     } 
+
+    //public static Vector2 LookAt(this Vector2 vector, Vector2 target)
+    //{
+
+    //}
 }

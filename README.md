@@ -20,4 +20,5 @@ Designed as top down hide and seek game.
  - [Some A*](https://gist.github.com/keithcollins/307c3335308fea62db2731265ab44c06)
  - [More A*](https://gist.github.com/DanBrooker/1f8855367ae4add40792)
  - [And even more A*](https://www.redblobgames.com/pathfinding/a-star/introduction.html)
- - [The A* I'm actually using??](https://www.arongranberg.com/astar/)
+ - [Fancy A*](https://www.arongranberg.com/astar/)
+ - [The A* I used as a base for the A* I'm using](https://github.com/SebLague/Pathfinding)

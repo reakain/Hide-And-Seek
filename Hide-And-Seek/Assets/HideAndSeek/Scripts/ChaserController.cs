@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pathfinding;
+//using Pathfinding;
 using System.Linq;
 
 
@@ -26,8 +26,8 @@ public class ChaserController : MonoBehaviour
     Rigidbody2D rigidbody2d;
     Animator animator;
     CapsuleCollider2D collider;
-    AIPath pather;
-    AIDestinationSetter targetSet;
+    //AIPath pather;
+    //AIDestinationSetter targetSet;
 
     HideZone[] hideZones;
 
@@ -46,9 +46,9 @@ public class ChaserController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
         collider = GetComponent<CapsuleCollider2D>();
-        pather = GetComponent<AIPath>();
-        targetSet = GetComponent<AIDestinationSetter>();
-        pather.canMove = false;
+        //pather = GetComponent<AIPath>();
+        //targetSet = GetComponent<AIDestinationSetter>();
+        //pather.canMove = false;
         lastPosition = new Vector2(rigidbody2d.position.x, rigidbody2d.position.y);
         hideZones = FindObjectsOfType<HideZone>();
 
@@ -82,7 +82,7 @@ public class ChaserController : MonoBehaviour
                 break;
             case ChaseState.Chase:
                 //ChaseFlee();
-                pather.canMove = true;
+                //pather.canMove = true;
                 
                 break;
             case ChaseState.Caught:
@@ -117,7 +117,7 @@ public class ChaserController : MonoBehaviour
         itState = ItState.Hider;
         SetNearestHide();
         currentState = ChaseState.Hide;
-        pather.canMove = true;
+        //pather.canMove = true;
     }
 
     public void Hide()
@@ -125,7 +125,7 @@ public class ChaserController : MonoBehaviour
         if (currentState == ChaseState.Hide)
         {
             currentState = ChaseState.Hidden;
-            pather.canMove = false;
+            //pather.canMove = false;
         }
         else if (currentState == ChaseState.Search)
         {
@@ -168,8 +168,8 @@ public class ChaserController : MonoBehaviour
         // Play the spotted animation
         currentState = ChaseState.Chase;
         searchedList.Clear();
-        targetSet.target = hider.transform;
-        pather.canMove = true;
+        //targetSet.target = hider.transform;
+        //pather.canMove = true;
     }
 
     public void SetNearestHide(bool isSearching = false)
@@ -180,22 +180,22 @@ public class ChaserController : MonoBehaviour
             if (tempHide.Count() <= 0)
             {
                 searchedList.Clear();
-                searchedList.Enqueue(targetSet.target.GetComponent<HideZone>());
+                //searchedList.Enqueue(targetSet.target.GetComponent<HideZone>());
                 tempHide = hideZones.Where(o => !searchedList.Contains(o));
             }
             var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
             var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
-            targetSet.target = closeHide.transform;
+            //targetSet.target = closeHide.transform;
             searchedList.Enqueue(closeHide);
         }
         else
         {
             var minDist = hideZones.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
             var closeHide = hideZones.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
-            targetSet.target = closeHide.transform;
+            //targetSet.target = closeHide.transform;
         }
 
-        pather.canMove = true;
+        //pather.canMove = true;
     }
 
     public void ChaseFlee()
