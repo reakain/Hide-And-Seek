@@ -25,7 +25,7 @@ public class ChaserController : MonoBehaviour
 
     Rigidbody2D rigidbody2d;
     Animator animator;
-    BoxCollider2D collider;
+    CapsuleCollider2D collider;
     AIPath pather;
     AIDestinationSetter targetSet;
 
@@ -44,14 +44,19 @@ public class ChaserController : MonoBehaviour
         searchedList = new Queue<HideZone>();
 
         rigidbody2d = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>();
-        collider = GetComponent<BoxCollider2D>();
+        animator = GetComponentInChildren<Animator>();
+        collider = GetComponent<CapsuleCollider2D>();
         pather = GetComponent<AIPath>();
         targetSet = GetComponent<AIDestinationSetter>();
         pather.canMove = false;
         lastPosition = new Vector2(rigidbody2d.position.x, rigidbody2d.position.y);
         hideZones = FindObjectsOfType<HideZone>();
 
+        
+    }
+
+    private void Start()
+    {
         currentState = ChaseState.Search;
         SetNearestHide(true);
         spotHideDist = HideAndSeekController.instance.spotHideDist;
@@ -172,6 +177,11 @@ public class ChaserController : MonoBehaviour
         if (isSearching)
         {
             var tempHide = hideZones.Where(o => !searchedList.Contains(o));
+            if (tempHide == null)
+            {
+                searchedList.Clear();
+                tempHide = hideZones.Where(o => !searchedList.Contains(o));
+            }
             var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
             var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
             targetSet.target = closeHide.transform;

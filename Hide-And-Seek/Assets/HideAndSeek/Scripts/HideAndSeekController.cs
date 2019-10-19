@@ -40,6 +40,7 @@ public class HideAndSeekController : MonoBehaviour
 
     private void Awake()
     {
+        instance = this;
         player = PlayerController.instance;
         npcs = FindObjectsOfType<ChaserController>();
         playerRole = ItState.Hider;
@@ -48,7 +49,7 @@ public class HideAndSeekController : MonoBehaviour
 
         npcRole[Random.Range(0, npcs.Length - 1)] = ItState.Chaser;
 
-        instance = this;
+        
     }
 
     // Start is called before the first frame update
