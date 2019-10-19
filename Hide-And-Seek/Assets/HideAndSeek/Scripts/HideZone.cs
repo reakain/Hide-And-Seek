@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Collider2D))]
 public class HideZone : MonoBehaviour
 {
     public Vector2 position { get; private set; }
+    public Vector2 bounds { get; private set; }
 
     private void Awake()
     {
         position = transform.position;
+        bounds = GetComponent<Collider2D>().bounds.size;
     }
 
     public float Distance(Vector2 target)

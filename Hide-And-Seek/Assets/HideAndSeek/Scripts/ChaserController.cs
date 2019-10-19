@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using Pathfinding;
+using Pathfinding;
 using System.Linq;
 
 
-public class ChaserController : MonoBehaviour
+public class ChaserController : Unit2D
 {
 
     public float movementSpeed = 4;
@@ -26,10 +26,8 @@ public class ChaserController : MonoBehaviour
     Rigidbody2D rigidbody2d;
     Animator animator;
     CapsuleCollider2D collider;
-    //AIPath pather;
-    //AIDestinationSetter targetSet;
 
-    HideZone[] hideZones;
+    public HideZone[] hideZones;
 
     Queue<HideZone> searchedList;
 
@@ -46,22 +44,20 @@ public class ChaserController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
         collider = GetComponent<CapsuleCollider2D>();
-        //pather = GetComponent<AIPath>();
-        //targetSet = GetComponent<AIDestinationSetter>();
-        //pather.canMove = false;
         lastPosition = new Vector2(rigidbody2d.position.x, rigidbody2d.position.y);
         hideZones = FindObjectsOfType<HideZone>();
-
-        
     }
 
-    private void Start()
+    protected override void Start()
     {
+        
+        itState = ItState.Chaser;
         currentState = ChaseState.Search;
         SetNearestHide(true);
         spotHideDist = HideAndSeekController.instance.spotHideDist;
         characterMask = HideAndSeekController.instance.characterMask;
         hideLayer = HideAndSeekController.instance.hideLayer;
+        base.Start();
     }
 
     void FixedUpdate()
@@ -168,8 +164,20 @@ public class ChaserController : MonoBehaviour
         // Play the spotted animation
         currentState = ChaseState.Chase;
         searchedList.Clear();
-        //targetSet.target = hider.transform;
-        //pather.canMove = true;
+        ChangeMoveTarget(hider.transform);
+    }
+
+    void ChangeMoveTarget(Transform newTarget, Vector2 bounds)
+    {
+        target = newTarget;
+        targetBounds = bounds;
+        StopCoroutine("UpdatePath");
+        StopCoroutine("FollowPath");
+        StartCoroutine("UpdatePath");
+    }
+    void ChangeMoveTarget(Transform newTarget)
+    {
+        ChangeMoveTarget(newTarget, Vector2.zero);
     }
 
     public void SetNearestHide(bool isSearching = false)
@@ -180,22 +188,20 @@ public class ChaserController : MonoBehaviour
             if (tempHide.Count() <= 0)
             {
                 searchedList.Clear();
-                //searchedList.Enqueue(targetSet.target.GetComponent<HideZone>());
+                searchedList.Enqueue(target.gameObject.GetComponent<HideZone>());
                 tempHide = hideZones.Where(o => !searchedList.Contains(o));
             }
             var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
             var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
-            //targetSet.target = closeHide.transform;
+            ChangeMoveTarget( closeHide.transform, closeHide.bounds );
             searchedList.Enqueue(closeHide);
         }
         else
         {
             var minDist = hideZones.Min<HideZone>(o => Vector2.Distance(o.position, rigidbody2d.position));
             var closeHide = hideZones.First(o => Vector2.Distance(o.position, rigidbody2d.position) == minDist);
-            //targetSet.target = closeHide.transform;
+            ChangeMoveTarget(closeHide.transform, closeHide.bounds);
         }
-
-        //pather.canMove = true;
     }
 
     public void ChaseFlee()
@@ -305,4 +311,19 @@ public class ChaserController : MonoBehaviour
             seesPlayer = false;
         }
     }
+
+    #region PATHINGFUNCTIONS
+    public override void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
+    {
+        if (pathSuccessful && 
+            (currentState == ChaseState.Chase || currentState == ChaseState.Search ||
+            currentState == ChaseState.Flee || currentState == ChaseState.Hide))
+        {
+            path = new Path2D(waypoints, transform.position, turnDst, stoppingDst);
+
+            StopCoroutine("FollowPath");
+            StartCoroutine("FollowPath");
+        }
+    }
+    #endregion
 }
