@@ -152,7 +152,7 @@ public class ChaserController : MonoBehaviour
     
     public void Search()
     {
-        var hit = Physics2D.Raycast(rigidbody2d.position, lookDirection, spotHideDist, characterMask);
+        var hit = Physics2D.CircleCast(rigidbody2d.position,spotHideDist, lookDirection, spotHideDist, characterMask);
         if (hit.collider != null)
         {
             var player = hit.collider.GetComponent<PlayerController>();
