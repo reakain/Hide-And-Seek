@@ -57,7 +57,7 @@ namespace Pathfinding
             Gizmos.color = Color.white;
             foreach (Line2D l in turnBoundaries)
             {
-                l.DrawWithGizmos(10);
+                l.DrawWithGizmos(4);
             }
 
         }

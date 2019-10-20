@@ -58,7 +58,7 @@ public class HideAndSeekController : MonoBehaviour
             player.SetGameVals(spotHideDist, spotHideViewRadius, itSwapTimer, characterMask, hideLayer, obstacleLayer);
             if(player.isIt)
             {
-                currentIt = player;
+                SetIt(player);
             }
         } 
     }

@@ -13,7 +13,7 @@ public class ChaseBase : MonoBehaviour
     public Vector2 lookDirection;
     protected Rigidbody2D rigid2d;
     protected HideAndSeekController gameControl;
-    protected List<GameObject> spottedList;
+    public List<GameObject> spottedList;
 
     [SerializeField]
     public Vector2 bounds { get; private set; }

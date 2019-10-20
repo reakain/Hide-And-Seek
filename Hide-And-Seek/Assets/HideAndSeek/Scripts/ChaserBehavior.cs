@@ -46,7 +46,7 @@ public class ChaserBehavior : ChaseBase
                 //.Condition(() => hidden)
                 .Sequence("It")
                     .Condition("Not It", () => isIt)
-                    .Sequence("Search")
+                    .Selector("Search")
                         //.Condition("Found Hider", () => !chase)
                         .Do("Check Hiding Spot", () =>
                         {
@@ -55,7 +55,7 @@ public class ChaserBehavior : ChaseBase
                                 return TaskStatus.Success;
                             }
                             HideZone hidespot = target.GetComponent<HideZone>();
-                            if (!hidespot || Vector2.Distance(rigid2d.position, hidespot.position) <= .2f)
+                            if (!hidespot || Physics2D.OverlapCircle(rigid2d.position,hidespot.bounds.magnitude,hideLayer))
                             {
                                 GetHidingSpot(true);
                             }
@@ -232,7 +232,7 @@ public class ChaserBehavior : ChaseBase
                     move = Vector2.MoveTowards(transform.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
                     transform.position = move;
                 }
-                UpdateAnimationDirection(move);
+                UpdateAnimationDirection(Vector2.MoveTowards(rigid2d.position, path.lookPoints[pathIndex],speed));
             }
 
             yield return null;
@@ -292,7 +292,7 @@ public class ChaserBehavior : ChaseBase
     protected void UpdateAnimationDirection(Vector2 movement)
     {
         // If your moving, set your look direction as move direction and normalize the vector (set it to magnitude of 1)
-        if (!(movement.x == 0f) || !(movement.y == 0f))
+        if (!Mathf.Approximately(movement.x, 0.0f) || !Mathf.Approximately(movement.y, 0.0f))
         {
             lookDirection.Set(-movement.x, -movement.y);
             lookDirection.Normalize();
@@ -306,5 +306,12 @@ public class ChaserBehavior : ChaseBase
             //animator.SetFloat("MoveSpeed", movement.magnitude);
         }
     }
-    
+    public void OnDrawGizmos()
+    {
+        if (path != null)
+        {
+            path.DrawWithGizmos();
+        }
+    }
+
 }
