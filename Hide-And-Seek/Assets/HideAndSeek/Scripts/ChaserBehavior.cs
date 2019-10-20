@@ -11,19 +11,19 @@ public class ChaserBehavior : ChaseBase
 
     
 
-    private bool chase = false;
+    
 
     
-    Rigidbody2D rigid2d;
+    
     Animator animator;
 
     HideZone[] hideZones;
 
     Queue<HideZone> searchedList;
 
-    Vector2 lookDirection;
+    
 
-    List<GameObject> spottedList;
+    
 
     [SerializeField]
     private BehaviorTree _tree;
@@ -44,11 +44,11 @@ public class ChaserBehavior : ChaseBase
 
     private void Awake()
     {
-        rigid2d = GetComponent<Rigidbody2D>();
+        
         hideZones = FindObjectsOfType<HideZone>();
         searchedList = new Queue<HideZone>();
         animator = GetComponentInChildren<Animator>();
-        spottedList = new List<GameObject>();
+        
 
         _tree = new BehaviorTreeBuilder(gameObject)
             .Selector()
@@ -164,36 +164,7 @@ public class ChaserBehavior : ChaseBase
         StopCoroutine("FollowPath");
     }
 
-    bool CheckForHider()
-    {
-        chase = false;
-        ClearSpottedList();
-        //spottedList = new List<GameObject>();
-        var hits = Physics2D.CircleCastAll(rigid2d.position, spotHideDist, lookDirection, spotHideDist, characterMask).Where(h => h.collider != null && h.collider != collider);
-        foreach(var hit in hits)
-        { 
-            var hider = hit.collider.GetComponent<ChaseBase>();
-            if (hider != null)
-            {
-                chase = true;
-                hider.spotted = true;
-                if (!spottedList.Contains(hider.gameObject))
-                {
-                    spottedList.Add(hider.gameObject);
-                }
-            }
-        }
-        return chase;
-    }
-
-    void ClearSpottedList()
-    {
-        foreach( var spot in spottedList)
-        {
-            spot.GetComponent<ChaseBase>().spotted = false;
-        }
-        spottedList.Clear();
-    }
+    
 
 
     protected IEnumerator FollowPath()
@@ -332,17 +303,5 @@ public class ChaserBehavior : ChaseBase
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        ChaseBase hider = other.gameObject.GetComponent<ChaseBase>();
-
-        if (hider != null && (!notIt || !hider.notIt))
-        {
-            // Someone has been caught. Either this npc or the player
-            Debug.Log("Gotcha!");
-            notIt = !notIt;
-            hider.notIt = !hider.notIt;
-
-        }
-    }
+    
 }

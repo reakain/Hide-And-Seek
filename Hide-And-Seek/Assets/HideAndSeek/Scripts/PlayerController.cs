@@ -26,7 +26,7 @@ public class PlayerController : ChaseBase
     public LayerMask interactMask;
 
     // Tracking the direction your character is looking -> for animating your character
-    Vector2 lookDirection = new Vector2(1, 0);
+    //Vector2 lookDirection = new Vector2(1, 0);
 
     // Defined by the DialogueUI script while dialogue is running
     public bool inDialogue = false;
@@ -51,17 +51,21 @@ public class PlayerController : ChaseBase
             return;
         }
 
-        if(hideAndSeekRole == ItState.Chaser)
+        //if(hideAndSeekRole == ItState.Chaser)
+        //{
+        //    var hit = Physics2D.Raycast(rigidbody2d.position, lookDirection, spotHideDist, characterMask);
+        //    if (hit.collider != null)
+        //    {
+        //        var chaser = hit.collider.GetComponent<ChaserController>();
+        //        if (chaser != null)
+        //        {
+        //            chaser.Spotted();
+        //        }
+        //    }
+        //}
+        if(!notIt)
         {
-            var hit = Physics2D.Raycast(rigidbody2d.position, lookDirection, spotHideDist, characterMask);
-            if (hit.collider != null)
-            {
-                var chaser = hit.collider.GetComponent<ChaserController>();
-                if (chaser != null)
-                {
-                    chaser.Spotted();
-                }
-            }
+            CheckForHider();
         }
 
         // Get your up/down/left/right player input
