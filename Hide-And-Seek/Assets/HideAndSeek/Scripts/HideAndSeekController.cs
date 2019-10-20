@@ -25,13 +25,16 @@ public enum ItState
 public class HideAndSeekController : MonoBehaviour
 {
     public static HideAndSeekController instance { get; private set; }
+
     public float spotHideDist = 3f;
+    public float spotHideViewRadius = 1f;
+    public float itSwapTimer = 0.5f;
     public LayerMask characterMask;
     public LayerMask hideLayer;
+    public LayerMask obstacleLayer;
 
-    PlayerController player;
-    ChaserController[] npcs;
-    GameObject chaser;
+    ChaseBase[] players;
+    public ChaseBase currentIt;
 
     public ChaseState[] npcState;
     public ItState[] npcRole;
@@ -41,15 +44,32 @@ public class HideAndSeekController : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        player = PlayerController.instance;
-        npcs = FindObjectsOfType<ChaserController>();
-        playerRole = ItState.Hider;
-        npcRole = new ItState[npcs.Length];
-        npcRole.Populate(ItState.Hider);
+        //player = PlayerController.instance;
+        //npcs = FindObjectsOfType<ChaserController>();
+        //playerRole = ItState.Hider;
+        //npcRole = new ItState[npcs.Length];
+        //npcRole.Populate(ItState.Hider);
 
-        npcRole[Random.Range(0, npcs.Length - 1)] = ItState.Chaser;
+        //npcRole[Random.Range(0, npcs.Length - 1)] = ItState.Chaser;
 
-        
+        players = FindObjectsOfType<ChaseBase>();
+        foreach (var player in players)
+        {
+            player.SetGameVals(spotHideDist, spotHideViewRadius, itSwapTimer, characterMask, hideLayer, obstacleLayer);
+            if(player.isIt)
+            {
+                currentIt = player;
+            }
+        } 
+    }
+
+    public void SetIt(ChaseBase newIt)
+    {
+        currentIt = newIt;
+        foreach (var player in players)
+        {
+            player.SetIt(newIt);
+        }
     }
 
     // Start is called before the first frame update

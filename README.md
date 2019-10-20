@@ -8,10 +8,10 @@ Unity build out for 2D top down hide and seek mini game.
 Designed as top down hide and seek game. 
 
 ## To-Do
- - State change logic
- - tagging
+ - Fix colliders to not get stuck on wall corners during path planning
 
 ## References
+ - [Behavior Trees](https://github.com/ashblue/fluid-behavior-tree)
  - [2D Navmesh](https://github.com/7ark/Unity-Pathfinding)
  - [2D Nodal pathfinding](http://www.jgallant.com/nodal-pathfinding-in-unity-2d-with-a-in-non-grid-based-games/)
  - [Navmesh2D](https://noobtuts.com/unity/navigation2d)

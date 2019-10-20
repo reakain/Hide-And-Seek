@@ -151,8 +151,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750ecbb5c5ca0524280e2694b42dca65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notIt: 1
+  isIt: 0
   spotted: 0
+  lookDirection: {x: 0, y: 0}
+  currentIt: {fileID: 0}
+  itResetTime: 0
   speed: 3
   hideAndSeekRole: 2
   hideAndSeekState: 0
@@ -303,7 +306,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_Sprite: {fileID: -2311659948842064771, guid: 4b5ceff872da04c459fbd765ed9b9ea6,
     type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -313,6 +316,36 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &696737530
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 696737531}
+  m_Layer: 11
+  m_Name: FleePosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &696737531
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 696737530}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3960088486981203869}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &859484417
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +412,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4096
     terrainPenalty: 0
-  obstacleProximityPenalty: 50
+  obstacleProximityPenalty: 500
 --- !u!4 &859484421
 Transform:
   m_ObjectHideFlags: 0
@@ -613,6 +646,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8991079023422800545, guid: e4fa755453e0c0846911534da6bcba68,
+        type: 3}
+      propertyPath: spotHideDist
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e4fa755453e0c0846911534da6bcba68, type: 3}
 --- !u!1 &3960088486927110794
@@ -672,7 +710,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_Sprite: {fileID: -2311659948842064771, guid: 4b5ceff872da04c459fbd765ed9b9ea6,
     type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.09511185, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -726,7 +764,6 @@ GameObject:
   - component: {fileID: 3960088486981203869}
   - component: {fileID: 3960088486981203876}
   - component: {fileID: 3960088486981203875}
-  - component: {fileID: 3960088486981203871}
   - component: {fileID: 3960088486981203870}
   m_Layer: 11
   m_Name: Chaser
@@ -747,6 +784,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3960088486927110798}
+  - {fileID: 696737531}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -762,41 +800,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4b848fbdd2b12c4b85aee5412975e36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notIt: 0
+  isIt: 1
   spotted: 0
+  lookDirection: {x: 0, y: 0}
+  currentIt: {fileID: 0}
+  itResetTime: 0
+  fleePos: {fileID: 696737530}
   target: {fileID: 122747313}
   targetBounds: {x: 0, y: 0}
   speed: 2
   turnSpeed: 1
   turnDst: 0.5
   stoppingDst: 0.5
---- !u!114 &3960088486981203871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3960088486981203868}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80c065a1ab82a9b479ca77f377ed95b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  targetBounds: {x: 0, y: 0}
-  speed: 2
-  turnSpeed: 1
-  turnDst: 0.5
-  stoppingDst: 0.5
-  movementSpeed: 4
-  maxDistance: 2
-  currentState: 5
-  itState: 1
-  seesPlayer: 0
-  inHideZone: 0
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!70 &3960088486981203875
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -811,7 +826,7 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.4, y: 0.2}
+  m_Size: {x: 0.4, y: 0.3}
   m_Direction: 1
 --- !u!50 &3960088486981203876
 Rigidbody2D:

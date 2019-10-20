@@ -43,8 +43,9 @@ public class PlayerController : ChaseBase
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         // Do nothing if dialogue is playing
         if (inDialogue)
         {
@@ -63,7 +64,7 @@ public class PlayerController : ChaseBase
         //        }
         //    }
         //}
-        if(!notIt)
+        if(isIt)
         {
             CheckForHider();
         }

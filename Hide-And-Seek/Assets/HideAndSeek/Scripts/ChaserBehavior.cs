@@ -8,22 +8,14 @@ using Pathfinding;
 
 public class ChaserBehavior : ChaseBase
 {
+    public GameObject fleePos;
 
-    
-
-    
-
-    
-    
     Animator animator;
 
     HideZone[] hideZones;
 
     Queue<HideZone> searchedList;
 
-    
-
-    
 
     [SerializeField]
     private BehaviorTree _tree;
@@ -44,7 +36,6 @@ public class ChaserBehavior : ChaseBase
 
     private void Awake()
     {
-        
         hideZones = FindObjectsOfType<HideZone>();
         searchedList = new Queue<HideZone>();
         animator = GetComponentInChildren<Animator>();
@@ -54,7 +45,7 @@ public class ChaserBehavior : ChaseBase
             .Selector()
                 //.Condition(() => hidden)
                 .Sequence("It")
-                    .Condition("Not It", () => !notIt)
+                    .Condition("Not It", () => isIt)
                     .Sequence("Search")
                         //.Condition("Found Hider", () => !chase)
                         .Do("Check Hiding Spot", () =>
@@ -87,27 +78,39 @@ public class ChaserBehavior : ChaseBase
                     .End()
                 .End()
                 .Sequence("Not It")
-                    .Condition("Not It", () => notIt)
-                    .Sequence("Hide")
-                        .Condition("Spotted", () => !spotted)
-                        //.Condition("Hidden", () => hidden)
-                        .Do("Find Hiding Spot", () =>
-                        {
-                            HideZone hidespot = target.GetComponent<HideZone>();
-                            if(!hidespot)
+                    .Condition("Not It", () => !isIt)
+                    .Selector()
+                        .Sequence("Hide")
+                            .Condition("Spotted", () => !spotted)
+                            //.Condition("Hidden", () => hidden)
+                            .Do("Find Hiding Spot", () =>
                             {
-                                GetHidingSpot();
-                            }
-                            return TaskStatus.Success;
-                        })
-                    .End()
-                    .Sequence("Flee")
-                        .Condition("Spotted", () => spotted)
-                        .Do("Run Away", () =>
-                        {
-                            Debug.Log("Run awaaaay");
-                            return TaskStatus.Success;
-                        })
+                                HideZone hidespot = target.GetComponent<HideZone>();
+                                if(!hidespot)
+                                {
+                                    GetHidingSpot();
+                                }
+                                return TaskStatus.Success;
+                            })
+                        .End()
+                        .Sequence("Flee")
+                            .Condition("Spotted", () => spotted)
+                            .Do("Run Away", () =>
+                            {
+                                if (target != fleePos || Vector2.Distance(rigid2d.position, target.transform.position) < 1f)
+                                {
+                                    var side = (Random.value > 0.5f) ? 1 : -1;
+                                    Vector2 newPos = rigid2d.position + gameControl.currentIt.lookDirection * spotHideDist + Vector2.Perpendicular(gameControl.currentIt.lookDirection) * Random.Range(side*spotHideViewRadius*2f, side*spotHideViewRadius);
+                                    if (!Physics2D.OverlapCircle(newPos,bounds.magnitude, obstacleLayer))
+                                    {
+                                        fleePos.transform.position = newPos;
+                                        SetDestination(fleePos, bounds);
+                                    }
+                                }
+
+                                return TaskStatus.Success;
+                            })
+                        .End()
                     .End()
                 .End()
             .End()
@@ -123,8 +126,9 @@ public class ChaserBehavior : ChaseBase
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         // Update our tree every frame
         _tree.Tick();
     }
@@ -302,6 +306,5 @@ public class ChaserBehavior : ChaseBase
             //animator.SetFloat("MoveSpeed", movement.magnitude);
         }
     }
-
     
 }

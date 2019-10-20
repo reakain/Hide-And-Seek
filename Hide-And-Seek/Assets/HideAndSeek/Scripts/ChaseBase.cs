@@ -5,41 +5,60 @@ using UnityEngine;
 
 public class ChaseBase : MonoBehaviour
 {
-    public bool notIt = true;
+    public bool isIt = true;
     protected bool chase = false;
     protected bool hidden = false;
     public bool spotted = false;
 
-    protected Vector2 lookDirection;
+    public Vector2 lookDirection;
     protected Rigidbody2D rigid2d;
-
+    protected HideAndSeekController gameControl;
     protected List<GameObject> spottedList;
 
+    [SerializeField]
     public Vector2 bounds { get; private set; }
+
+    public ChaseBase currentIt;
 
     protected Collider2D collider;
 
     // From HideAndSeekController
     protected float spotHideDist;
+    protected float spotHideViewRadius;
+    protected float itSwapTimer;
     protected LayerMask characterMask;
     protected LayerMask hideLayer;
+    protected LayerMask obstacleLayer;
+
+    public float itResetTime = 0f;
+
+    public void SetGameVals(float hideDist,float hideRadius,float itTimer, LayerMask charL, LayerMask hideL, LayerMask obsL)
+    {
+        spotHideDist = hideDist;
+        spotHideViewRadius = hideRadius;
+        itSwapTimer = itTimer;
+        characterMask = charL;
+        hideLayer = hideL;
+        obstacleLayer = obsL;
+    }
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
         collider = GetComponent<Collider2D>();
         bounds = collider.bounds.size;
-        spotHideDist = HideAndSeekController.instance.spotHideDist;
-        characterMask = HideAndSeekController.instance.characterMask;
-        hideLayer = HideAndSeekController.instance.hideLayer;
+        gameControl = HideAndSeekController.instance;
+        //spotHideDist = HideAndSeekController.instance.spotHideDist;
+        //characterMask = HideAndSeekController.instance.characterMask;
+        //hideLayer = HideAndSeekController.instance.hideLayer;
         rigid2d = GetComponent<Rigidbody2D>();
         spottedList = new List<GameObject>();
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
-        
+        itResetTime += Time.deltaTime;
     }
 
     protected bool CheckForHider()
@@ -47,7 +66,7 @@ public class ChaseBase : MonoBehaviour
         chase = false;
         ClearSpottedList();
         //spottedList = new List<GameObject>();
-        var hits = Physics2D.CircleCastAll(rigid2d.position, spotHideDist, lookDirection, spotHideDist, characterMask).Where(h => h.collider != null && h.collider != collider);
+        var hits = Physics2D.CircleCastAll(rigid2d.position, spotHideViewRadius, lookDirection, spotHideDist, characterMask).Where(h => h.collider != null && h.collider != collider);
         foreach (var hit in hits)
         {
             var hider = hit.collider.GetComponent<ChaseBase>();
@@ -77,13 +96,24 @@ public class ChaseBase : MonoBehaviour
     {
         ChaseBase hider = other.gameObject.GetComponent<ChaseBase>();
 
-        if (hider != null && (!notIt || !hider.notIt))
+        if (hider != null && itResetTime > itSwapTimer)
         {
-            // Someone has been caught. Either this npc or the player
-            Debug.Log("Gotcha!");
-            notIt = !notIt;
-            hider.notIt = !hider.notIt;
+            if (isIt)
+            {
+                // Someone has been caught. Either this npc or the player
+                Debug.Log("Gotcha! New it is: " + hider.gameObject.name);
 
+                gameControl.SetIt(hider);
+            }
         }
+    }
+
+    public void SetIt(ChaseBase newIt)
+    {
+        currentIt = newIt;
+        isIt = (this == currentIt) ? true : false;
+        spotted = false;
+        ClearSpottedList();
+        itResetTime = 0f;
     }
 }

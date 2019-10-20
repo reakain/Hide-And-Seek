@@ -32,52 +32,61 @@ namespace Pathfinding
             UnityEngine.Debug.Log("nodes in end node: " + endNodes.Length);
             Node2D[] targetNode = endNodes.Where(n => n.walkable).ToArray();
             UnityEngine.Debug.Log("usable target nodes: " + targetNode.Length);
-            Node2D endNode = targetNode[0];
-
-            startNode.parent = startNode;
-
-
-            if (startNode.walkable && targetNode != null && targetNode.Length > 0)
+            Node2D endNode = startNode;
+            try
             {
-                Heap<Node2D> openSet = new Heap<Node2D>(grid.MaxSize);
-                HashSet<Node2D> closedSet = new HashSet<Node2D>();
-                openSet.Add(startNode);
+                endNode = targetNode[0];
 
-                while (openSet.Count > 0)
+                startNode.parent = startNode;
+
+
+                if (startNode.walkable && targetNode != null && targetNode.Length > 0)
                 {
-                    Node2D currentNode = openSet.RemoveFirst();
-                    closedSet.Add(currentNode);
+                    Heap<Node2D> openSet = new Heap<Node2D>(grid.MaxSize);
+                    HashSet<Node2D> closedSet = new HashSet<Node2D>();
+                    openSet.Add(startNode);
 
-                    if (targetNode.Contains(currentNode))
+                    while (openSet.Count > 0)
                     {
-                        sw.Stop();
-                        UnityEngine.Debug.Log("Path found: " + sw.ElapsedMilliseconds + " ms");
-                        pathSuccess = true;
-                        endNode = currentNode;
-                        break;
-                    }
+                        Node2D currentNode = openSet.RemoveFirst();
+                        closedSet.Add(currentNode);
 
-                    foreach (Node2D neighbour in grid.GetNeighbours(currentNode))
-                    {
-                        if (!neighbour.walkable || closedSet.Contains(neighbour))
+                        if (targetNode.Contains(currentNode))
                         {
-                            continue;
+                            sw.Stop();
+                            UnityEngine.Debug.Log("Path found: " + sw.ElapsedMilliseconds + " ms");
+                            pathSuccess = true;
+                            endNode = currentNode;
+                            break;
                         }
 
-                        int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
-                        if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                        foreach (Node2D neighbour in grid.GetNeighbours(currentNode))
                         {
-                            neighbour.gCost = newMovementCostToNeighbour;
-                            neighbour.hCost = GetDistance(neighbour, targetNode);
-                            neighbour.parent = currentNode;
+                            if (!neighbour.walkable || closedSet.Contains(neighbour))
+                            {
+                                continue;
+                            }
 
-                            if (!openSet.Contains(neighbour))
-                                openSet.Add(neighbour);
-                            else
-                                openSet.UpdateItem(neighbour);
+                            int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour) + neighbour.movementPenalty;
+                            if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                            {
+                                neighbour.gCost = newMovementCostToNeighbour;
+                                neighbour.hCost = GetDistance(neighbour, targetNode);
+                                neighbour.parent = currentNode;
+
+                                if (!openSet.Contains(neighbour))
+                                    openSet.Add(neighbour);
+                                else
+                                    openSet.UpdateItem(neighbour);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.Log("No usable end nodes");
+                callback(new PathResult(waypoints, pathSuccess, request.callback));
             }
             if (pathSuccess)
             {
