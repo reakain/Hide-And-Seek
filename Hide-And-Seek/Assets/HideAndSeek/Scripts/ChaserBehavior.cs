@@ -4,18 +4,18 @@ using UnityEngine;
 using CleverCrow.Fluid.BTs.Tasks;
 using CleverCrow.Fluid.BTs.Trees;
 using System.Linq;
+using Pathfinding;
 
-public class ChaserBehavior : MonoBehaviour
+public class ChaserBehavior : ChaseBase
 {
 
-    public bool notIt = false;
+    
 
-    private bool hidden = false;
     private bool chase = false;
-    private bool spotted = false;
 
-    GameObject target;
+    
     Rigidbody2D rigid2d;
+    Animator animator;
 
     HideZone[] hideZones;
 
@@ -28,50 +28,76 @@ public class ChaserBehavior : MonoBehaviour
     [SerializeField]
     private BehaviorTree _tree;
 
-    // From HideAndSeekController
-    float spotHideDist;
-    LayerMask characterMask;
-    LayerMask hideLayer;
+    
+
+    // For Pathing
+    public GameObject target;
+    public Vector2 targetBounds = Vector2.zero;
+    public float speed = 20;
+    public float turnSpeed = 3;
+    public float turnDst = 5;
+    public float stoppingDst = 10;
+    protected Path2D path;
+    const float minPathUpdateTime = .2f;
+    const float pathUpdateMoveThreshold = .5f;
+
 
     private void Awake()
     {
         rigid2d = GetComponent<Rigidbody2D>();
         hideZones = FindObjectsOfType<HideZone>();
+        searchedList = new Queue<HideZone>();
+        animator = GetComponentInChildren<Animator>();
         spottedList = new List<GameObject>();
 
         _tree = new BehaviorTreeBuilder(gameObject)
             .Selector()
-                .Condition(() => hidden)
+                //.Condition(() => hidden)
                 .Sequence("It")
                     .Condition("Not It", () => !notIt)
                     .Sequence("Search")
-                        .Condition("Found Hider", () => !chase)
+                        //.Condition("Found Hider", () => !chase)
                         .Do("Check Hiding Spot", () =>
                         {
+                            if (CheckForHider())
+                            {
+                                return TaskStatus.Success;
+                            }
                             HideZone hidespot = target.GetComponent<HideZone>();
-                            if (!hidespot || Vector2.Distance(rigid2d.position,hidespot.position) <= .2f)
+                            if (!hidespot || Vector2.Distance(rigid2d.position, hidespot.position) <= .2f)
                             {
                                 GetHidingSpot(true);
                             }
-                            CheckForHider();
-                            return TaskStatus.Success;
+                            return TaskStatus.Failure;
                         })
                     .End()
                     .Sequence("Chase")
                         .Condition("Found Hider", () => chase)
                         .Do("Chase Hider", () =>
                         {
+                            if (spottedList != null && !spottedList.Contains(target) && spottedList.Count > 0)
+                            {
+                                var min = spottedList.Min(g => Vector2.Distance(g.transform.position, rigid2d.position));
+                                var targ = spottedList.Find(g => Vector2.Distance(g.transform.position, rigid2d.position) <= min);
+                                SetDestination(targ,targ.GetComponent<ChaseBase>().bounds);
+                            }
+
                             return TaskStatus.Success;
                         })
                     .End()
                 .End()
                 .Sequence("Not It")
-                    .Condition("Not It", () => !notIt)
+                    .Condition("Not It", () => notIt)
                     .Sequence("Hide")
                         .Condition("Spotted", () => !spotted)
-                        .Condition("Hidden", () => hidden)
+                        //.Condition("Hidden", () => hidden)
                         .Do("Find Hiding Spot", () =>
                         {
+                            HideZone hidespot = target.GetComponent<HideZone>();
+                            if(!hidespot)
+                            {
+                                GetHidingSpot();
+                            }
                             return TaskStatus.Success;
                         })
                     .End()
@@ -79,6 +105,7 @@ public class ChaserBehavior : MonoBehaviour
                         .Condition("Spotted", () => spotted)
                         .Do("Run Away", () =>
                         {
+                            Debug.Log("Run awaaaay");
                             return TaskStatus.Success;
                         })
                     .End()
@@ -88,11 +115,11 @@ public class ChaserBehavior : MonoBehaviour
 
     }
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
-        spotHideDist = HideAndSeekController.instance.spotHideDist;
-        characterMask = HideAndSeekController.instance.characterMask;
-        hideLayer = HideAndSeekController.instance.hideLayer;
+        base.Start();
+
+        StartCoroutine(UpdatePath());
     }
 
     // Update is called once per frame
@@ -115,41 +142,207 @@ public class ChaserBehavior : MonoBehaviour
             }
             var minDist = tempHide.Min<HideZone>(o => Vector2.Distance(o.position, rigid2d.position));
             var closeHide = tempHide.First(o => Vector2.Distance(o.position, rigid2d.position) == minDist);
-            SetDestination(closeHide.transform, closeHide.bounds);
+            SetDestination(closeHide.gameObject, closeHide.bounds);
             searchedList.Enqueue(closeHide);
         }
         else
         {
             var minDist = hideZones.Min<HideZone>(o => Vector2.Distance(o.position, rigid2d.position));
             var closeHide = hideZones.First(o => Vector2.Distance(o.position, rigid2d.position) == minDist);
-            SetDestination(closeHide.transform, closeHide.bounds);
+            SetDestination(closeHide.gameObject, closeHide.bounds);
         }
     }
 
-    void SetDestination(Transform pos, Vector2 bounds)
+    void SetDestination(GameObject pos, Vector2 newbounds)
     {
-
+        if(target == pos)
+        {
+            return;
+        }
+        target = pos;
+        targetBounds = newbounds;
+        StopCoroutine("FollowPath");
     }
 
-    void CheckForHider()
+    bool CheckForHider()
     {
-        var hit = Physics2D.CircleCast(rigid2d.position, spotHideDist, lookDirection, spotHideDist, characterMask);
-        if (hit.collider != null)
+        chase = false;
+        ClearSpottedList();
+        //spottedList = new List<GameObject>();
+        var hits = Physics2D.CircleCastAll(rigid2d.position, spotHideDist, lookDirection, spotHideDist, characterMask).Where(h => h.collider != null && h.collider != collider);
+        foreach(var hit in hits)
+        { 
+            var hider = hit.collider.GetComponent<ChaseBase>();
+            if (hider != null)
+            {
+                chase = true;
+                hider.spotted = true;
+                if (!spottedList.Contains(hider.gameObject))
+                {
+                    spottedList.Add(hider.gameObject);
+                }
+            }
+        }
+        return chase;
+    }
+
+    void ClearSpottedList()
+    {
+        foreach( var spot in spottedList)
         {
-            var player = hit.collider.GetComponent<PlayerController>();
-            var npc = hit.collider.GetComponent<ChaserBehavior>();
-            if (player != null)
+            spot.GetComponent<ChaseBase>().spotted = false;
+        }
+        spottedList.Clear();
+    }
+
+
+    protected IEnumerator FollowPath()
+    {
+
+        bool followingPath = true;
+        int pathIndex = 0;
+        //transform.LookAt (path.lookPoints [0],Vector3.up);
+
+        float speedPercent = 1;
+
+        while (followingPath)
+        {
+            Vector2 pos2D;
+
+            if (rigid2d)
             {
-                chase = true;
-                //player.spotted = true;
-                spottedList.Add(player.gameObject);
+                pos2D = new Vector2(rigid2d.position.x, rigid2d.position.y);
             }
-            else if(npc != null)
+            else
             {
-                chase = true;
-                npc.spotted = true;
-                spottedList.Add(npc.gameObject);
+                pos2D = new Vector2(transform.position.x, transform.position.y);
             }
+
+            while (path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
+            {
+                if (pathIndex == path.finishLineIndex)
+                {
+                    followingPath = false;
+                    break;
+                }
+                else
+                {
+                    pathIndex++;
+                }
+            }
+
+            if (followingPath)
+            {
+
+                if (pathIndex >= path.slowDownIndex && stoppingDst > 0)
+                {
+                    speedPercent = Mathf.Clamp01(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(pos2D) / stoppingDst);
+                    if (speedPercent < 0.01f)
+                    {
+                        followingPath = false;
+                    }
+                }
+
+                //Quaternion targetRotation = Quaternion.LookRotation (Vector3.zero,path.lookPoints [pathIndex] - transform.position);
+                //transform.rotation = Quaternion.Lerp (transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
+                //transform.Translate (Vector3.up * Time.deltaTime * speed * speedPercent, Space.Self);
+                Vector2 move;
+                if (rigid2d)
+                {
+                    move = Vector2.MoveTowards(rigid2d.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
+                    rigid2d.MovePosition(move);
+                }
+                else
+                {
+                    move = Vector2.MoveTowards(transform.position, path.lookPoints[pathIndex], Time.deltaTime * speed * speedPercent);
+                    transform.position = move;
+                }
+                UpdateAnimationDirection(move);
+            }
+
+            yield return null;
+
+        }
+    }
+
+    protected IEnumerator UpdatePath()
+    {
+
+        if (Time.timeSinceLevelLoad < 0.5f)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        if (rigid2d)
+        {
+            PathRequestManager2D.RequestPath(new PathRequest(rigid2d.position, target.transform.position, targetBounds, OnPathFound));
+        }
+        else
+        {
+            PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.transform.position, targetBounds, OnPathFound));
+        }
+
+        float sqrMoveThreshold = pathUpdateMoveThreshold * pathUpdateMoveThreshold;
+        Vector3 targetPosOld = target.transform.position;
+
+        while (true)
+        {
+            yield return new WaitForSeconds(minPathUpdateTime);
+            //print (((target.position - targetPosOld).sqrMagnitude) + "    " + sqrMoveThreshold);
+            if ((target.transform.position - targetPosOld).sqrMagnitude > sqrMoveThreshold)
+            {
+                if (rigid2d)
+                {
+                    PathRequestManager2D.RequestPath(new PathRequest(rigid2d.position, target.transform.position, targetBounds, OnPathFound));
+                }
+                else
+                {
+                    PathRequestManager2D.RequestPath(new PathRequest(transform.position, target.transform.position, targetBounds, OnPathFound));
+                }
+                targetPosOld = target.transform.position;
+            }
+        }
+    }
+
+    public virtual void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
+    {
+        if (pathSuccessful)
+        {
+            path = new Path2D(waypoints, transform.position, turnDst, stoppingDst);
+
+            StopCoroutine("FollowPath");
+            StartCoroutine("FollowPath");
+        }
+    }
+
+    protected void UpdateAnimationDirection(Vector2 movement)
+    {
+        // If your moving, set your look direction as move direction and normalize the vector (set it to magnitude of 1)
+        if (!(movement.x == 0f) || !(movement.y == 0f))
+        {
+            lookDirection.Set(-movement.x, -movement.y);
+            lookDirection.Normalize();
+        }
+
+        if (animator)
+        {
+            // Set your animator animation direction and speeds
+            animator.SetFloat("Look X", lookDirection.x);
+            animator.SetFloat("Look Y", lookDirection.y);
+            //animator.SetFloat("MoveSpeed", movement.magnitude);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        ChaseBase hider = other.gameObject.GetComponent<ChaseBase>();
+
+        if (hider != null && (!notIt || !hider.notIt))
+        {
+            // Someone has been caught. Either this npc or the player
+            Debug.Log("Gotcha!");
+            notIt = !notIt;
+            hider.notIt = !hider.notIt;
+
         }
     }
 }

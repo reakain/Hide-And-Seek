@@ -151,6 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750ecbb5c5ca0524280e2694b42dca65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  notIt: 1
+  spotted: 0
   speed: 3
   hideAndSeekRole: 2
   hideAndSeekState: 0
@@ -725,6 +727,7 @@ GameObject:
   - component: {fileID: 3960088486981203876}
   - component: {fileID: 3960088486981203875}
   - component: {fileID: 3960088486981203871}
+  - component: {fileID: 3960088486981203870}
   m_Layer: 11
   m_Name: Chaser
   m_TagString: Untagged
@@ -747,7 +750,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3960088486981203871
+--- !u!114 &3960088486981203870
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -755,6 +758,26 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3960088486981203868}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4b848fbdd2b12c4b85aee5412975e36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  notIt: 0
+  spotted: 0
+  target: {fileID: 122747313}
+  targetBounds: {x: 0, y: 0}
+  speed: 2
+  turnSpeed: 1
+  turnDst: 0.5
+  stoppingDst: 0.5
+--- !u!114 &3960088486981203871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3960088486981203868}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80c065a1ab82a9b479ca77f377ed95b4, type: 3}
   m_Name: 

@@ -3,25 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Attach this with a rigidbody and collider to your character
-public class PlayerController : MonoBehaviour
+public class PlayerController : ChaseBase
 {
     public static PlayerController instance;
-
-    public Vector2 bounds { get; private set; }
 
     // Character movement speed, adjust to match your game scale
     public float speed = 3.0f;
 
     // Rigidbody, collider, and sprite renderer, and animator attached to your 2D character. It grabs these items at scene start
     Rigidbody2D rigidbody2d;
-    Collider2D collider;
+    //Collider2D collider;
     SpriteRenderer sprite;
     Animator animator;
 
     public ItState hideAndSeekRole = ItState.None;
     public ChaseState hideAndSeekState = ChaseState.None;
-
-    float spotHideDist;
 
     // Define with unity player input button to use for object interaction
     public string fishButton = "Jump";
@@ -29,24 +25,20 @@ public class PlayerController : MonoBehaviour
     // Define the layer your interactable colliders are on
     public LayerMask interactMask;
 
-    LayerMask characterMask;
-
     // Tracking the direction your character is looking -> for animating your character
     Vector2 lookDirection = new Vector2(1, 0);
 
     // Defined by the DialogueUI script while dialogue is running
     public bool inDialogue = false;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         // Get the components attached to your character. Animator commented out for still sprite testing
         rigidbody2d = GetComponent<Rigidbody2D>();
-        collider = GetComponent<Collider2D>();
-        bounds = collider.bounds.size;
+        //collider = GetComponent<Collider2D>();
         sprite = GetComponent<SpriteRenderer>();
         animator = GetComponentInChildren<Animator>();
-        spotHideDist = HideAndSeekController.instance.spotHideDist;
-        characterMask = HideAndSeekController.instance.characterMask;
         instance = this;
     }
 
